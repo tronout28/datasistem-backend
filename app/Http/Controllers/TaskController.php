@@ -39,7 +39,6 @@ class TaskController extends Controller
 
     public function insertTask(Request $request)
     {
-        // Validasi request
         $request->validate([
             'produksi_id' => 'nullable|exists:users,id',
             'paket_id' => 'required|exists:pakets,id',
@@ -53,10 +52,8 @@ class TaskController extends Controller
             'note' => 'nullable',
         ]);
 
-        // Ambil ID user yang login
         $marketing_id = Auth::id();
 
-        // Insert task baru
         $task = Task::create([
             'marketing_id' => $marketing_id,
             'produksi_id' => $request->produksi_id,
