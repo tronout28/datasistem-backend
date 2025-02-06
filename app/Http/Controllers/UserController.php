@@ -33,7 +33,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
-            'phone_number' => 'required|unique:users,phone',
+            'phone_number' => 'required|unique:users,phone_number',
             'password' => 'required|string|confirmed|min:6',
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5000',
             'role' => ['required',Rule::in(['admin','marketing','produksi'])],
@@ -65,6 +65,46 @@ class UserController extends Controller
 
             $user->save();
         }
+
+        return response()->json([
+            'success' => 'success',
+            'data' => $user,
+        ]);
+    }
+
+    public function UpdateProfile(Request $request)
+    {
+        $request->validate([
+            'email' => 'nullable|email|unique:users,email,' . $request->user()->id,
+            'phone_number' => 'nullable|unique:users,phone_number,' . $request->user()->id,
+            'password' => 'nullable|string|confirmed|min:6',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5000',
+        ]);
+
+        $user = $request->user();
+        $user->email = $request->email ?? $user->email;
+        $user->phone_number = $request->phone_number ?? $user->phone_number;
+
+        if ($request->password) {
+            $user->password = bcrypt($request->password);
+        }
+
+        if ($request->hasFile('profile_picture')) {
+            $profile_picture = $request->file('profile_picture');
+            $imageName = time() . '.' . $profile_picture->extension();
+            $profile_picture->move(public_path('profile_picture'), $imageName);
+
+            // Jika ada gambar sebelumnya, hapus gambar lama
+            if ($user->profile_picture && file_exists(public_path('profile_picture/' . $user->profile_picture))) {
+                unlink(public_path('profile_picture/' . $user->profile_picture));
+            }
+
+            // Menyimpan nama gambar ke database
+            $user->profile_picture = $imageName;
+            $user->profile_picture = url('profile_picture/' . $user->profile_picture);
+        }
+
+        $user->save();
 
         return response()->json([
             'success' => 'success',
