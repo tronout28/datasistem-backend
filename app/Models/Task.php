@@ -27,17 +27,11 @@ class Task extends Model
         return $this->belongsTo(User::class, 'marketing_id');
     }
 
-    /**
-     * Relasi ke User sebagai Produksi.
-     */
     public function produksi()
     {
         return $this->belongsTo(User::class, 'produksi_id');
     }
 
-    /**
-     * Relasi ke Paket.
-     */
     public function paket()
     {
         return $this->belongsTo(Paket::class, 'paket_id');

@@ -54,12 +54,10 @@ class UserController extends Controller
             $imageName = time() . '.' . $profile_picture->extension();
             $profile_picture->move(public_path('profile_picture'), $imageName);
 
-            // Jika ada gambar sebelumnya, hapus gambar lama
             if ($user->profile_picture && file_exists(public_path('profile_picture/' . $user->profile_picture))) {
                 unlink(public_path('profile_picture/' . $user->profile_picture));
             }
 
-            // Menyimpan nama gambar ke database
             $user->profile_picture = $imageName;
             $user->profile_picture = url('profile_picture/' . $user->profile_picture);
 
@@ -94,12 +92,10 @@ class UserController extends Controller
             $imageName = time() . '.' . $profile_picture->extension();
             $profile_picture->move(public_path('profile_picture'), $imageName);
 
-            // Jika ada gambar sebelumnya, hapus gambar lama
             if ($user->profile_picture && file_exists(public_path('profile_picture/' . $user->profile_picture))) {
                 unlink(public_path('profile_picture/' . $user->profile_picture));
             }
 
-            // Menyimpan nama gambar ke database
             $user->profile_picture = $imageName;
             $user->profile_picture = url('profile_picture/' . $user->profile_picture);
         }
