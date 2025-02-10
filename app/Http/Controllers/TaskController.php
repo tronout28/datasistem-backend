@@ -10,7 +10,7 @@ class TaskController extends Controller
 {
     public function index()
     {
-        $tasks = Task::with(['marketing', 'produksi', 'paket'])->get();
+        $tasks = Task::with(['marketing', 'produksi1', 'produksi2', 'produksi3', 'paket'])->get();
 
         return response()->json([
             'success' => true,
@@ -21,7 +21,7 @@ class TaskController extends Controller
 
     public function show($id)
     {
-        $task = Task::with(['marketing', 'produksi', 'paket'])->find($id);
+        $task = Task::with(['marketing', 'produksi1', 'produksi2', 'produksi3', 'paket'])->find($id);
 
         if (!$task) {
             return response()->json([
@@ -40,12 +40,14 @@ class TaskController extends Controller
     public function insertTask(Request $request)
     {
         $request->validate([
-            'produksi_id' => 'nullable|exists:users,id',
+            'produksi_id_1' => 'required|exists:users,id',
+            'produksi_id_2' => 'nullable|exists:users,id',
+            'produksi_id_3' => 'nullable|exists:users,id',
             'paket_id' => 'required|exists:pakets,id',
             'task_name' => 'required',
             'bisnis_name' => 'required',
             'bisnis_domain' => 'required',
-            'queue' => 'required|integer',
+            'queue' => 'nullable|integer',
             'status' => 'nullable|in:open,pending,on-progress,completed',
             'deadline' => 'required|date',
             'join_date' => 'required|date',
@@ -56,7 +58,9 @@ class TaskController extends Controller
 
         $task = Task::create([
             'marketing_id' => $marketing_id,
-            'produksi_id' => $request->produksi_id,
+            'produksi_id_1' => $request->produksi_id_1,
+            'produksi_id_2' => $request->produksi_id_2,
+            'produksi_id_3' => $request->produksi_id_3,
             'paket_id' => $request->paket_id,
             'task_name' => $request->task_name,
             'bisnis_name' => $request->bisnis_name,
@@ -71,7 +75,7 @@ class TaskController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Task berhasil ditambahkan',
-            'data' => Task::with(['marketing', 'produksi', 'paket'])->find($task->id)
+            'data' => Task::with(['marketing', 'produksi1', 'produksi2', 'produksi3', 'paket'])->find($task->id)
         ]);
     }
 
@@ -87,7 +91,9 @@ class TaskController extends Controller
         }
 
         $validatedData = $request->validate([
-            'produksi_id' => 'nullable|exists:users,id',
+            'produksi_id_1' => 'nullable|exists:users,id',
+            'produksi_id_2' => 'nullable|exists:users,id',
+            'produksi_id_3' => 'nullable|exists:users,id',
             'paket_id' => 'nullable|exists:pakets,id',
             'task_name' => 'nullable|string|max:255',
             'bisnis_name' => 'nullable|string|max:255',
@@ -99,19 +105,27 @@ class TaskController extends Controller
             'note' => 'nullable|string',
         ]);
 
-        $updateData = array_filter($validatedData, function ($value) {
-            return !is_null($value);
-        });
-
-        $updateData['queue'] = $updateData['queue'] ?? $task->queue;
-        $updateData['status'] = $updateData['status'] ?? $task->status;
+        $updateData = [
+            'produksi_id_1' => $validatedData['produksi_id_1'] ?? $task->produksi_id_1,
+            'produksi_id_2' => $validatedData['produksi_id_2'] ?? $task->produksi_id_2,
+            'produksi_id_3' => $validatedData['produksi_id_3'] ?? $task->produksi_id_3,
+            'paket_id' => $validatedData['paket_id'] ?? $task->paket_id,
+            'task_name' => $validatedData['task_name'] ?? $task->task_name,
+            'bisnis_name' => $validatedData['bisnis_name'] ?? $task->bisnis_name,
+            'bisnis_domain' => $validatedData['bisnis_domain'] ?? $task->bisnis_domain,
+            'queue' => $validatedData['queue'] ?? $task->queue,
+            'status' => $validatedData['status'] ?? $task->status,
+            'deadline' => $validatedData['deadline'] ?? $task->deadline,
+            'join_date' => $validatedData['join_date'] ?? $task->join_date,
+            'note' => $validatedData['note'] ?? $task->note,
+        ];
 
         $task->update($updateData);
 
         return response()->json([
             'success' => true,
             'message' => 'Task berhasil diperbarui',
-            'data' => Task::with(['marketing', 'produksi', 'paket'])->find($task->id)
+            'data' => Task::with(['marketing', 'produksi1', 'produksi2', 'produksi3', 'paket'])->find($task->id)
         ]);
     }
 
@@ -139,7 +153,7 @@ class TaskController extends Controller
     {
         $marketing_id = Auth::id();
 
-        $tasks = Task::with(['marketing', 'produksi', 'paket'])
+        $tasks = Task::with(['marketing', 'produksi1', 'produksi2', 'produksi3', 'paket'])
             ->where('marketing_id', $marketing_id)
             ->get();
 
@@ -154,8 +168,12 @@ class TaskController extends Controller
     {
         $produksi_id = Auth::id();
 
-        $tasks = Task::with(['marketing', 'produksi', 'paket'])
-            ->where('produksi_id', $produksi_id)
+        $tasks = Task::with(['marketing', 'produksi1', 'produksi2', 'produksi3', 'paket'])
+            ->where(function ($query) use ($produksi_id) {
+                $query->where('produksi_id_1', $produksi_id)
+                    ->orWhere('produksi_id_2', $produksi_id)
+                    ->orWhere('produksi_id_3', $produksi_id);
+            })
             ->get();
 
         return response()->json([
@@ -167,7 +185,7 @@ class TaskController extends Controller
 
     public function getTaskByPaket($paket_id)
     {
-        $tasks = Task::with(['marketing', 'produksi', 'paket'])
+        $tasks = Task::with(['marketing', 'produksi1', 'produksi2', 'produksi3', 'paket'])
             ->where('paket_id', $paket_id)
             ->get();
 

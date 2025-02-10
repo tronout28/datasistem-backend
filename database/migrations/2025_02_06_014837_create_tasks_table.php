@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('marketing_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('produksi_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('produksi_id_1')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('produksi_id_2')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('produksi_id_3')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('paket_id')->nullable()->constrained('pakets')->nullOnDelete();
             
             $table->string('task_name')->nullable();
