@@ -19,3 +19,19 @@ Route::get('/profile_picture/{filename}', function ($filename) {
 
     return $response;
 });
+
+Route::get('/image_report/{filename}', function ($filename) {
+    $path = public_path('image_report/'.$filename);
+
+    if (! File::exists($path)) {
+        abort(404);
+    }
+
+    $file = File::get($path);
+    $type = File::mimeType($path);
+
+    $response = Response::make($file, 200);
+    $response->header('Content-Type', $type);
+
+    return $response;
+});

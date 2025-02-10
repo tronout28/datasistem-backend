@@ -117,4 +117,24 @@ class UserController extends Controller
             'data' => $total,
         ]);
     }
+
+    public function showMarketing()
+    {
+        $marketing = User::where('role', 'marketing')->get();
+
+        return response()->json([
+            'success' => 'success',
+            'data' => $marketing,
+        ]);
+    }
+
+    public function showProduksi()
+    {
+        $produksi = User::where('role', 'produksi')->get();
+
+        return response()->json([
+            'success' => 'success',
+            'data' => $produksi,
+        ]);
+    }
 }
